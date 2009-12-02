@@ -36,7 +36,8 @@ import android.widget.MediaController;
 import android.widget.VideoView;
 
 public class MovieViewControl implements MediaPlayer.OnErrorListener,
-        MediaPlayer.OnCompletionListener {
+        MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnPreparedListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = "MovieViewControl";
@@ -92,7 +93,9 @@ public class MovieViewControl implements MediaPlayer.OnErrorListener,
         }
 
         mVideoView.setOnErrorListener(this);
+        mVideoView.setOnPreparedListener(this);
         mVideoView.setOnCompletionListener(this);
+
         mVideoView.setVideoURI(mUri);
         mMediaController = new MediaController(context);
         mVideoView.setMediaController(mMediaController);
@@ -224,9 +227,12 @@ public class MovieViewControl implements MediaPlayer.OnErrorListener,
             mVideoView.setVideoURI(mUri);
             mVideoView.seekTo(mPositionWhenPaused);
             mPositionWhenPaused = -1;
-            if (mWasPlayingWhenPaused) {
-                mMediaController.show(0);
-            }
+        }
+    }
+
+    public void onPrepared(MediaPlayer mp) {
+        if (mWasPlayingWhenPaused) {
+            mMediaController.show(0);
         }
     }
 
