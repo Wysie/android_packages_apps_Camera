@@ -18,7 +18,10 @@ package com.android.camera;
 
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -64,6 +67,8 @@ public class MovieView extends Activity  {
     public void onPause() {
         mControl.onPause();
         super.onPause();
+
+        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -71,6 +76,22 @@ public class MovieView extends Activity  {
         if (hasFocus) {
             Log.v(TAG, "hasFocus");
             mControl.onResume();
+            IntentFilter intentFilter =
+                    new IntentFilter(Intent.ACTION_MEDIA_EJECT);
+            intentFilter.addDataScheme("file");
+            registerReceiver(mReceiver, intentFilter);
         }
     }
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_MEDIA_EJECT)) {
+                mControl.stopVideoPlayback();
+                finish();
+            }
+        }
+    };
+
 }

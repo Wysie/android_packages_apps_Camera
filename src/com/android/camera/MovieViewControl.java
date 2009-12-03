@@ -205,6 +205,11 @@ public class MovieViewControl implements MediaPlayer.OnErrorListener,
         }
     }
 
+    public void stopVideoPlayback() {
+        mHandler.removeCallbacksAndMessages(null);
+        mVideoView.stopPlayback();
+    }
+
     public void onPause() {
         mHandler.removeCallbacksAndMessages(null);
         setBookmark(mVideoView.getCurrentPosition());
