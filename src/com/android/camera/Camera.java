@@ -1820,6 +1820,14 @@ public class Camera extends Activity implements View.OnClickListener,
             mParameters.setColorEffect(colorEffect);
         }
 
+        // Set auto exposure parameter.
+        String autoExposure = mPreferences.getString(
+                CameraSettings.KEY_AUTOEXPOSURE,
+                getString(R.string.pref_camera_autoexposure_default));
+        if (isSupported(autoExposure, mParameters.getSupportedAutoexposure())) {
+            mParameters.setAutoExposure(autoExposure);
+        }
+
         // If scene mode is set, we cannot set flash mode, white balance, and
         // focus mode, instead, we read it from driver
         String flashMode;
@@ -1872,6 +1880,15 @@ public class Camera extends Activity implements View.OnClickListener,
                     whiteBalance = Parameters.WHITE_BALANCE_AUTO;
                 }
             }
+
+        // Set anti banding parameter.
+        String antiBanding = mPreferences.getString(
+                CameraSettings.KEY_ANTIBANDING,
+                getString(R.string.pref_camera_antibanding_default));
+		    if (isSupported(antiBanding, mParameters.getSupportedAntibanding())) {
+            mParameters.setAntibanding(antiBanding);
+        }
+
 
             // Set focus mode.
             mFocusMode = mPreferences.getString(

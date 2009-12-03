@@ -33,8 +33,10 @@ public class CameraSettings {
     public static final String KEY_FOCUS_MODE = "pref_camera_focusmode_key";
     public static final String KEY_FLASH_MODE = "pref_camera_flashmode_key";
     public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
+    public static final String KEY_AUTOEXPOSURE = "pref_camera_autoexposure_key";
     public static final String KEY_WHITE_BALANCE =
             "pref_camera_whitebalance_key";
+    public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
     public static final String KEY_SCENE_MODE = "pref_camera_scenemode_key";
 
     public static final int CURRENT_VERSION = 3;
@@ -120,6 +122,8 @@ public class CameraSettings {
                 (ListPreference) screen.findPreference(KEY_PICTURE_SIZE);
         ListPreference whiteBalance =
                 (ListPreference) screen.findPreference(KEY_WHITE_BALANCE);
+        ListPreference antiBanding =
+                (ListPreference) screen.findPreference(KEY_ANTIBANDING);
         ListPreference colorEffect =
                 (ListPreference) screen.findPreference(KEY_COLOR_EFFECT);
         ListPreference sceneMode =
@@ -128,6 +132,8 @@ public class CameraSettings {
                 (ListPreference) screen.findPreference(KEY_FLASH_MODE);
         ListPreference focusMode =
                 (ListPreference) screen.findPreference(KEY_FOCUS_MODE);
+        ListPreference autoExposure =
+		        (ListPreference) screen.findPreference(KEY_AUTOEXPOSURE);
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
@@ -149,9 +155,17 @@ public class CameraSettings {
             filterUnsupportedOptions(screen,
                     whiteBalance, mParameters.getSupportedWhiteBalance());
         }
+        if (antiBanding != null) {
+            filterUnsupportedOptions(screen,
+                    antiBanding, mParameters.getSupportedAntibanding());
+        }
         if (colorEffect != null) {
             filterUnsupportedOptions(screen,
                     colorEffect, mParameters.getSupportedColorEffects());
+        }
+        if (autoExposure != null) {
+            filterUnsupportedOptions(screen,
+                    autoExposure, mParameters.getSupportedAutoexposure());
         }
         if (sceneMode != null) {
             filterUnsupportedOptions(screen,
