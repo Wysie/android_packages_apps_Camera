@@ -2135,9 +2135,9 @@ public class Camera extends Activity implements View.OnClickListener,
         mHandler.sendEmptyMessageDelayed(CLEAR_SCREEN_DELAY, SCREEN_DELAY);
     }
 
-    private static String[] mQualityStrings = {"superfine", "fine", "normal"};
+    private static String[] mQualityStrings = {"superfine", "fine", "normal", "100", "95", "85", "75", "65", "55"};
     private static String[] mQualityNumbers = SystemProperties.get(
-            "ro.media.enc.jpeg.quality", "85,75,65").split(",");
+            "ro.media.enc.jpeg.quality", "85,75,65,100,95,85,75,65,55").split(",");
     private static int DEFAULT_QUALITY = 85;
 
     // Translate from a quality string to a quality number using the system
