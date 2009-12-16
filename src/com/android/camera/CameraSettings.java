@@ -26,6 +26,10 @@ public class CameraSettings {
             "pref_camera_recordlocation_key";
     public static final String KEY_VIDEO_QUALITY =
             "pref_camera_videoquality_key";
+    public static final String KEY_VIDEO_ENCODER =
+            "pref_camera_videoencoder_key";
+    public static final String KEY_AUDIO_ENCODER =
+            "pref_camera_audioencoder_key";
     public static final String KEY_VIDEO_DURATION =
             "pref_camera_video_duration_key";
     public static final String KEY_PICTURE_SIZE = "pref_camera_picturesize_key";
