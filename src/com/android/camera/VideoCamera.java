@@ -474,8 +474,17 @@ public class VideoCamera extends Activity implements View.OnClickListener,
     }
 
     private void readVideoPreferences() {
+        boolean videoQualityHigh =
+                getBooleanPreference(CameraSettings.KEY_VIDEO_QUALITY,
+                CameraSettings.DEFAULT_VIDEO_QUALITY_VALUE);
 
+        // Set video quality.
         Intent intent = getIntent();
+        if (intent.hasExtra(MediaStore.EXTRA_VIDEO_QUALITY)) {
+            int extraVideoQuality =
+                    intent.getIntExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+            videoQualityHigh = (extraVideoQuality > 0);
+        }
 
         // Set video duration limit. The limit is read from the preference,
         // unless it is specified in the intent.
@@ -498,19 +507,7 @@ public class VideoCamera extends Activity implements View.OnClickListener,
             }
         }
 
-        String videoEncoder = mPreferences.getString(
-                    CameraSettings.KEY_VIDEO_ENCODER,
-                    getString(R.string.pref_camera_videoencoder_default));
-
-        String audioEncoder = mPreferences.getString(
-                    CameraSettings.KEY_AUDIO_ENCODER,
-                    getString(R.string.pref_camera_audioencoder_default));
-
-        String videoQuality = mPreferences.getString(
-                    CameraSettings.KEY_VIDEO_QUALITY,
-                    getString(R.string.pref_camera_videoquality_default));
-
-        mProfile = new MediaRecorderProfile(videoEncoder, audioEncoder, videoQuality);
+        mProfile = new MediaRecorderProfile(videoQualityHigh);
     }
 
     private void resizeForPreviewAspectRatio() {
@@ -1507,6 +1504,7 @@ class MediaRecorderProfile {
 
     @SuppressWarnings("unused")
     private static final String TAG = "MediaRecorderProfile";
+    public final boolean mHiQuality;
     public final int mOutputFormat;
     public final int mVideoEncoder;
     public final int mAudioEncoder;
@@ -1518,38 +1516,62 @@ class MediaRecorderProfile {
     public final int mAudioChannels;
     public final int mAudioSamplingRate;
 
-    MediaRecorderProfile(String videocodec, String audiocodec, String videoquality) {
-        mOutputFormat = OUTPUT_FORMAT_TABLE.get("3gp");
-        mVideoEncoder = VIDEO_ENCODER_TABLE.get(videocodec);
-        mAudioEncoder = AUDIO_ENCODER_TABLE.get(audiocodec);
+    MediaRecorderProfile(boolean hiQuality) {
+        mHiQuality = hiQuality;
 
-        if (videoquality.equals("wvga")) {
-           mVideoWidth = 800;
-           mVideoHeight = 480;
-           Log.v(TAG, "Resolution - 800x480");
-        } else if (videoquality.equals("vga")) {
-           mVideoWidth = 640;
-           mVideoHeight = 480;
-           Log.v(TAG, "Resolution - 640x480");
-        } else if (videoquality.equals("cif")) {
-            mVideoWidth = 352;
-            mVideoHeight = 288;
-            Log.v(TAG, "Resolution - 352*288");
-        } else if (videoquality.equals("qvga")) {
-            mVideoWidth = 320;
-            mVideoHeight = 240;
-            Log.v(TAG, "Resolution - 320*240");
-        } else {
-           mVideoWidth = 176;
-           mVideoHeight = 144;
-           Log.v(TAG, "Resolution - 176x144");
-        }
+        mOutputFormat = getFromTable("ro.media.enc.hprof.file.format",
+                                     "ro.media.enc.lprof.file.format",
+                                     OUTPUT_FORMAT_TABLE);
 
-        mVideoFps = 20;
-        mVideoBitrate = 360000;
-        mAudioBitrate = 23450;
-        mAudioChannels = 1;
-        mAudioSamplingRate = 8000;
+        mVideoEncoder = getFromTable("ro.media.enc.hprof.codec.vid",
+                                     "ro.media.enc.lprof.codec.vid",
+                                     VIDEO_ENCODER_TABLE);
+
+        mAudioEncoder = getFromTable("ro.media.enc.hprof.codec.aud",
+                                     "ro.media.enc.lprof.codec.aud",
+                                     AUDIO_ENCODER_TABLE);
+
+        mVideoWidth = getInt("ro.media.enc.hprof.vid.width",
+                             "ro.media.enc.lprof.vid.width",
+                             352, 176);
+
+        mVideoHeight = getInt("ro.media.enc.hprof.vid.height",
+                              "ro.media.enc.lprof.vid.height",
+                              288, 144);
+
+        mVideoFps = getInt("ro.media.enc.hprof.vid.fps",
+                           "ro.media.enc.lprof.vid.fps",
+                           20, 20);
+
+        mVideoBitrate = getInt("ro.media.enc.hprof.vid.bps",
+                               "ro.media.enc.lprof.vid.bps",
+                               360000, 192000);
+
+        mAudioBitrate = getInt("ro.media.enc.hprof.aud.bps",
+                               "ro.media.enc.lprof.aud.bps",
+                               23450, 23450);
+
+        mAudioChannels = getInt("ro.media.enc.hprof.aud.ch",
+                                "ro.media.enc.lprof.aud.ch",
+                                1, 1);
+
+        mAudioSamplingRate = getInt("ro.media.enc.hprof.aud.hz",
+                                    "ro.media.enc.lprof.aud.hz",
+                                    8000, 8000);
+    }
+
+    private int getFromTable(String highKey, String lowKey,
+                DefaultHashMap<String, Integer> table) {
+        String s;
+        s = SystemProperties.get(mHiQuality ? highKey : lowKey);
+        return table.get(s);
+    }
+
+    private int getInt(String highKey, String lowKey, int highDefault,
+                int lowDefault) {
+        String key = mHiQuality ? highKey : lowKey;
+        int defaultValue = mHiQuality ? highDefault : lowDefault;
+        return SystemProperties.getInt(key, defaultValue);
     }
 
     private static final DefaultHashMap<String, Integer>
@@ -1570,8 +1592,6 @@ class MediaRecorderProfile {
         VIDEO_ENCODER_TABLE.putDefault(MediaRecorder.VideoEncoder.DEFAULT);
 
         AUDIO_ENCODER_TABLE.put("amrnb", MediaRecorder.AudioEncoder.AMR_NB);
-        AUDIO_ENCODER_TABLE.put("qcelp", MediaRecorder.AudioEncoder.QCELP);
-        AUDIO_ENCODER_TABLE.put("evrc", MediaRecorder.AudioEncoder.EVRC);
         AUDIO_ENCODER_TABLE.put("amrwb", MediaRecorder.AudioEncoder.AMR_WB);
         AUDIO_ENCODER_TABLE.put("aac", MediaRecorder.AudioEncoder.AAC);
         AUDIO_ENCODER_TABLE.put("aacplus", MediaRecorder.AudioEncoder.AAC_PLUS);
