@@ -354,6 +354,7 @@ public class Camera extends Activity implements View.OnClickListener,
     }
 
     private void initializeZoom() {
+        mParameters = mCameraDevice.getParameters();
         if (!mParameters.isZoomSupported()) return;
 
         mZoomMax = mParameters.getMaxZoom();
