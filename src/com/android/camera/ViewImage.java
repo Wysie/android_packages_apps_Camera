@@ -48,12 +48,17 @@ import com.android.camera.gallery.VideoObject;
 
 import java.util.Random;
 
+import com.cyanogenmod.android.input.MultiTouchController;
+import com.cyanogenmod.android.input.MultiTouchController.MultiTouchObjectCanvas;
+import com.cyanogenmod.android.input.MultiTouchController.PointInfo;
+import com.cyanogenmod.android.input.MultiTouchController.PositionAndScale;
+
 // This activity can display a whole picture and navigate them in a specific
 // gallery. It has two modes: normal mode and slide show mode. In normal mode
 // the user view one image at a time, and can click "previous" and "next"
 // button to see the previous or next image. In slide show mode it shows one
 // image after another, with some transition effect.
-public class ViewImage extends Activity implements View.OnClickListener {
+public class ViewImage extends Activity implements View.OnClickListener, MultiTouchObjectCanvas<Object> {
     private static final String PREF_SLIDESHOW_REPEAT =
             "pref_gallery_slideshow_repeat_key";
     private static final String PREF_SHUFFLE_SLIDESHOW =
@@ -123,6 +128,8 @@ public class ViewImage extends Activity implements View.OnClickListener {
     GestureDetector mGestureDetector;
     private ZoomButtonsController mZoomButtonsController;
 
+    private MultiTouchController mMultiTouchController;
+    
     // The image view displayed for normal mode.
     private ImageViewTouch mImageView;
     // This is the cache for thumbnail bitmaps.
@@ -230,8 +237,86 @@ public class ViewImage extends Activity implements View.OnClickListener {
         if (mZoomButtonsController.isVisible()) {
             scheduleDismissOnScreenControls();
         }
-        return super.dispatchTouchEvent(m);
+        if (mMultiTouchController.onTouchEvent(m)) {
+			// Handling a multitouch scale operation.
+			// Need to send a cancel event to reset the WebView state, in case
+			// we're over a link (so that the menu doesn't pop up)
+			if (!mIsMultiTouchScaleOp) {
+				// First multitouch event, cancel any current singletouch ops
+				m.setAction(MotionEvent.ACTION_CANCEL);
+				super.dispatchTouchEvent(m);
+				// Pop up a dialog if can't zoom current view
+				mPoppedUpCannotZoomDialog = false;
+				mIsMultiTouchScaleOp = true;
+			}
+			return true;
+		} else {
+			mIsMultiTouchScaleOp = false;
+			if (super.dispatchTouchEvent(m)) {
+				return true;
+			} else {
+				return mGestureDetector.onTouchEvent(m);
+			}
+		}
+
     }
+
+    //----------------- MultiTouch stuff ------------------
+
+    private static final double ZOOM_SENSITIVITY = 1.6;
+
+    private static final float ZOOM_LOG_BASE_INV = 1.0f / (float) Math.log(2.0 / ZOOM_SENSITIVITY);
+
+    private int mCurrZoom;
+
+    private boolean mIsMultiTouchScaleOp = false, mPoppedUpCannotZoomDialog = false;
+
+    @Override
+    public Object getDraggableObjectAtPoint(PointInfo pt) {
+    // Return some non-null object to initiate multitouch scaling
+        return new Object();
+    }
+    @Override
+    public void getPositionAndScale(Object obj, PositionAndScale objPosAndScaleOut) {
+    // Always start with the current zoom scale at 1.0, and scale relative to that
+    // (because we only have access to mWebView.zoomIn() and mWebView.zoomOut(),
+    // so it's all relative anyway)
+        objPosAndScaleOut.set(0.0f, 0.0f, 1.0f);
+        mCurrZoom = 0;
+    }
+
+
+    @Override
+    public void selectObject(Object obj, PointInfo pt) {
+    }
+
+    @Override
+    public boolean setPositionAndScale(Object obj, PositionAndScale update, PointInfo touchPoint) {
+    	
+        float newRelativeScale = update.getScale();
+        int targetZoom = (int) Math.round(Math.log(newRelativeScale) * ZOOM_LOG_BASE_INV);
+        boolean zoomOk = true;
+
+        while (mCurrZoom > targetZoom) {
+            mCurrZoom--;
+            zoomOk = mImageView.zoomOut();
+            if (!zoomOk && !mPoppedUpCannotZoomDialog) {
+                Toast.makeText(this, "Cannot zoom out", Toast.LENGTH_SHORT).show();
+                mPoppedUpCannotZoomDialog = true;
+            }
+        }
+        while (mCurrZoom < targetZoom) {
+            mCurrZoom++;
+            zoomOk = mImageView.zoomIn();
+            if (!zoomOk && !mPoppedUpCannotZoomDialog) {
+                Toast.makeText(this, "Cannot zoom in", Toast.LENGTH_SHORT).show();
+                mPoppedUpCannotZoomDialog = true;
+            }
+        }
+        return true;
+    }
+
+    // ------------------------------------------------------
 
     private void updateZoomButtonsEnabled() {
         ImageViewTouch imageView = mImageView;
@@ -666,6 +751,8 @@ public class ViewImage extends Activity implements View.OnClickListener {
         }
 
         setupOnScreenControls(findViewById(R.id.rootLayout), mImageView);
+        
+        mMultiTouchController = new MultiTouchController(this, getResources(), false);
     }
 
     private void updateActionIcons() {

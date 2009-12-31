@@ -588,21 +588,27 @@ class CropImageView extends ImageViewTouchBase {
     }
 
     @Override
-    protected void zoomIn() {
-        super.zoomIn();
-        for (HighlightView hv : mHighlightViews) {
-            hv.mMatrix.set(getImageMatrix());
-            hv.invalidate();
+    protected boolean zoomIn() {
+        boolean ret = super.zoomIn();
+        if (ret) {
+       		for (HighlightView hv : mHighlightViews) {
+       			hv.mMatrix.set(getImageMatrix());
+       			hv.invalidate();
+       		}
         }
+        return ret;
     }
 
     @Override
-    protected void zoomOut() {
-        super.zoomOut();
-        for (HighlightView hv : mHighlightViews) {
-            hv.mMatrix.set(getImageMatrix());
-            hv.invalidate();
+    protected boolean zoomOut() {
+        boolean ret = super.zoomOut();
+        if (ret) {
+        	for (HighlightView hv : mHighlightViews) {
+        		hv.mMatrix.set(getImageMatrix());
+        		hv.invalidate();
+        	}
         }
+        return ret;
     }
 
     @Override

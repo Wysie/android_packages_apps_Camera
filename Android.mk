@@ -4,6 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := user
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_JAVA_LIBRARIES := com.cyanogenmod.android
 
 LOCAL_PACKAGE_NAME := Camera
 LOCAL_CERTIFICATE := media
