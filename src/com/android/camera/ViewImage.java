@@ -291,7 +291,7 @@ public class ViewImage extends Activity implements View.OnClickListener {
     }
 
     private void setupOnTouchListeners(View rootView) {
-        mGestureDetector = new GestureDetector(this, new MyGestureListener());
+        mGestureDetector = new GestureDetector(this, new MyGestureListener(this));
 
         // If the user touches anywhere on the panel (including the
         // next/prev button). We show the on-screen controls. In addition
@@ -324,6 +324,34 @@ public class ViewImage extends Activity implements View.OnClickListener {
     private class MyGestureListener extends
             GestureDetector.SimpleOnGestureListener {
 
+    	private static final int SWIPE_MIN_DISTANCE = 75;
+    	private static final int SWIPE_MAX_OFF_PATH = 250;
+    	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+    	
+    	
+        private final ViewImage viewImage;
+        
+        public MyGestureListener(ViewImage viewImage) {
+        	this.viewImage = viewImage;
+        }
+        
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        	try {
+        		if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+        			return false;
+        		// right to left swipe
+        		if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+        			viewImage.moveNextOrPrevious(1);
+        		} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+        			viewImage.moveNextOrPrevious(-1);
+        		}
+        	} catch (Exception e) {
+        		//nothing
+        	}
+        	return false;
+        }
+        
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2,
                 float distanceX, float distanceY) {
