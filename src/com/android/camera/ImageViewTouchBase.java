@@ -393,14 +393,16 @@ abstract class ImageViewTouchBase extends ImageView {
         Matrix tmp = new Matrix(mSuppMatrix);
         tmp.postScale(1F / rate, 1F / rate, cx, cy);
 
+        boolean success = true;
         if (getScale(tmp) < 1F) {
+        	success = false;
             mSuppMatrix.setScale(1F, 1F, cx, cy);
         } else {
             mSuppMatrix.postScale(1F / rate, 1F / rate, cx, cy);
         }
         setImageMatrix(getImageViewMatrix());
         center(true, true);
-        return true;
+        return success;
     }
 
     protected void postTranslate(float dx, float dy) {

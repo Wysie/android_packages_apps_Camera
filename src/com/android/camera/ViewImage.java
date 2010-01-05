@@ -246,7 +246,6 @@ public class ViewImage extends Activity implements View.OnClickListener, MultiTo
 				m.setAction(MotionEvent.ACTION_CANCEL);
 				super.dispatchTouchEvent(m);
 				// Pop up a dialog if can't zoom current view
-				mPoppedUpCannotZoomDialog = false;
 				mIsMultiTouchScaleOp = true;
 			}
 			return true;
@@ -269,7 +268,7 @@ public class ViewImage extends Activity implements View.OnClickListener, MultiTo
 
     private int mCurrZoom;
 
-    private boolean mIsMultiTouchScaleOp = false, mPoppedUpCannotZoomDialog = false;
+    private boolean mIsMultiTouchScaleOp = false;
 
     @Override
     public Object getDraggableObjectAtPoint(PointInfo pt) {
@@ -295,29 +294,33 @@ public class ViewImage extends Activity implements View.OnClickListener, MultiTo
     	
         float newRelativeScale = update.getScale();
         int targetZoom = (int) Math.round(Math.log(newRelativeScale) * ZOOM_LOG_BASE_INV);
-        boolean zoomOk = true;
 
-        while (mCurrZoom > targetZoom) {
-            mCurrZoom--;
-            zoomOk = mImageView.zoomOut();
-            if (!zoomOk && !mPoppedUpCannotZoomDialog) {
-                Toast.makeText(this, "Cannot zoom out", Toast.LENGTH_SHORT).show();
-                mPoppedUpCannotZoomDialog = true;
+        mZoomButtonsController.setVisible(false);
+
+        if (mCurrZoom > targetZoom) {
+        	while (mCurrZoom > targetZoom) {
+        		mCurrZoom--;
+        		if (!mImageView.zoomOut()) {
+        			break;
+        		}
             }
+        } else if (mCurrZoom < targetZoom) {
+        	while (mCurrZoom < targetZoom) {
+        		mCurrZoom++;
+        		if (!mImageView.zoomIn()) {
+        			break;
+        		}
+        	}
         }
-        while (mCurrZoom < targetZoom) {
-            mCurrZoom++;
-            zoomOk = mImageView.zoomIn();
-            if (!zoomOk && !mPoppedUpCannotZoomDialog) {
-                Toast.makeText(this, "Cannot zoom in", Toast.LENGTH_SHORT).show();
-                mPoppedUpCannotZoomDialog = true;
-            }
-        }
+        
+        updateZoomButtonsEnabled();
+        mZoomButtonsController.setVisible(true);
+        
         return true;
     }
 
     // ------------------------------------------------------
-
+    
     private void updateZoomButtonsEnabled() {
         ImageViewTouch imageView = mImageView;
         float scale = imageView.getScale();
