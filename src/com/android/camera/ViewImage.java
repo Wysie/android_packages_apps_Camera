@@ -16,9 +16,10 @@
 
 package com.android.camera;
 
-import com.android.camera.MultiTouchController.MultiTouchObjectCanvas;
-import com.android.camera.MultiTouchController.PointInfo;
-import com.android.camera.MultiTouchController.PositionAndScale;
+import com.cyanogenmod.android.input.MultiTouchController;
+import com.cyanogenmod.android.input.MultiTouchController.MultiTouchObjectCanvas;
+import com.cyanogenmod.android.input.MultiTouchController.PointInfo;
+import com.cyanogenmod.android.input.MultiTouchController.PositionAndScale;
 import com.android.camera.gallery.IImage;
 import com.android.camera.gallery.IImageList;
 import com.android.camera.gallery.VideoObject;
