@@ -658,7 +658,6 @@ public class Camera extends Activity implements View.OnClickListener,
             // the mean time and fill it, but that could have happened between the
             // shutter press and saving the JPEG too.
             calculatePicturesRemaining();
-            decrementkeypress();
         }
     }
 
@@ -854,7 +853,7 @@ public class Camera extends Activity implements View.OnClickListener,
 
         public void onSnap() {
             // If we are already in the middle of taking a snapshot then ignore.
-            if (mPausing || mStatus == SNAPSHOT_IN_PROGRESS) {
+            if (mPausing || mStatus == SNAPSHOT_IN_PROGRESS || !mPreviewing) {
                 return;
             }
             mCaptureStartTime = System.currentTimeMillis();
