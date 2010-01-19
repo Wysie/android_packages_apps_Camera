@@ -658,6 +658,7 @@ public class Camera extends Activity implements View.OnClickListener,
             // the mean time and fill it, but that could have happened between the
             // shutter press and saving the JPEG too.
             calculatePicturesRemaining();
+            decrementkeypress();
         }
     }
 
