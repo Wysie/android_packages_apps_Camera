@@ -36,6 +36,7 @@ public class MovieView extends Activity  {
 
     private MovieViewControl mControl;
     private boolean mFinishOnCompletion;
+    private boolean mUnregisterReceiver = false;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -68,7 +69,10 @@ public class MovieView extends Activity  {
         mControl.onPause();
         super.onPause();
 
-        unregisterReceiver(mReceiver);
+        if (mUnregisterReceiver == true) {
+            unregisterReceiver(mReceiver);
+            mUnregisterReceiver = false;
+        }
     }
 
     @Override
@@ -80,6 +84,7 @@ public class MovieView extends Activity  {
                     new IntentFilter(Intent.ACTION_MEDIA_EJECT);
             intentFilter.addDataScheme("file");
             registerReceiver(mReceiver, intentFilter);
+            mUnregisterReceiver = true;
         }
     }
 
