@@ -159,6 +159,7 @@ public class Camera extends Activity implements View.OnClickListener,
     private boolean mFirstTimeInitialized;
     private boolean mIsImageCaptureIntent;
     private boolean mRecordLocation;
+    private boolean mFocusSound;
 
     private static final int FOCUS_NOT_STARTED = 0;
     private static final int FOCUSING = 1;
@@ -682,7 +683,7 @@ public class Camera extends Activity implements View.OnClickListener,
                 // User is half-pressing the focus key. Play the focus tone.
                 // Do not take the picture now.
                 ToneGenerator tg = mFocusToneGenerator;
-                if (tg != null) {
+                if (tg != null && mFocusSound) {
                     tg.startTone(ToneGenerator.TONE_PROP_BEEP2);
                 }
                 if (focused) {
@@ -1270,6 +1271,9 @@ public class Camera extends Activity implements View.OnClickListener,
         mFocusMode = mPreferences.getString(
                 CameraSettings.KEY_FOCUS_MODE,
                 getString(R.string.pref_camera_focusmode_default));
+        mFocusSound = mPreferences.getString(
+                CameraSettings.KEY_FOCUS_SOUND,
+                getString(R.string.pref_camera_focus_sound_default)).equals("on");
     }
 
     @Override
@@ -2112,6 +2116,10 @@ public class Camera extends Activity implements View.OnClickListener,
             } else {
                 stopReceivingLocationUpdates();
             }
+        } else if (CameraSettings.KEY_FOCUS_SOUND.equals(key)) {
+            mFocusSound = mPreferences.getString(
+                    CameraSettings.KEY_FOCUS_SOUND,
+                    getString(R.string.pref_camera_focus_sound_default)).equals("on");
         } else {
             // All preferences except RECORD_LOCATION are camera parameters.
             // Call setCameraParameters to take effect now.

@@ -38,6 +38,8 @@ public class CameraSettings {
             "pref_camera_whitebalance_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
     public static final String KEY_SCENE_MODE = "pref_camera_scenemode_key";
+    
+    public static final String KEY_FOCUS_SOUND = "pref_camera_focus_sound_key";
 
     public static final int CURRENT_VERSION = 3;
 
