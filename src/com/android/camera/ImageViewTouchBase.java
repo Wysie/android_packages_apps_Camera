@@ -355,20 +355,20 @@ abstract class ImageViewTouchBase extends ImageView {
         zoomTo(scale, cx, cy);
     }
 
-    protected boolean zoomIn() {
-        return zoomIn(SCALE_RATE);
+    protected void zoomIn() {
+        zoomIn(SCALE_RATE);
     }
 
-    protected boolean zoomOut() {
-        return zoomOut(SCALE_RATE);
+    protected void zoomOut() {
+        zoomOut(SCALE_RATE);
     }
 
-    protected boolean zoomIn(float rate) {
+    protected void zoomIn(float rate) {
         if (getScale() >= mMaxZoom) {
-            return false;     // Don't let the user zoom into the molecular level.
+            return;     // Don't let the user zoom into the molecular level.
         }
         if (mBitmapDisplayed.getBitmap() == null) {
-            return false;
+            return;
         }
 
         float cx = getWidth() / 2F;
@@ -376,16 +376,13 @@ abstract class ImageViewTouchBase extends ImageView {
 
         mSuppMatrix.postScale(rate, rate, cx, cy);
         setImageMatrix(getImageViewMatrix());
-        return true;
     }
 
-    protected boolean zoomOut(float rate) {
+    protected void zoomOut(float rate) {
         if (mBitmapDisplayed.getBitmap() == null) {
-            return false;
+            return;
         }
-        if (getScale() == 0) {
-        	return false;
-        }
+
         float cx = getWidth() / 2F;
         float cy = getHeight() / 2F;
 
@@ -402,7 +399,6 @@ abstract class ImageViewTouchBase extends ImageView {
         }
         setImageMatrix(getImageViewMatrix());
         center(true, true);
-        return success;
     }
 
     protected void postTranslate(float dx, float dy) {
