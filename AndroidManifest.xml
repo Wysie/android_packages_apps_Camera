@@ -15,7 +15,6 @@
     <application android:icon="@drawable/ic_launcher_camera"
             android:label="@string/camera_label"
             android:taskAffinity="">
-        <uses-library android:name="com.cyanogenmod.android" />
         <service android:name="UploadService" android:process="android.process.media" />
         <receiver android:name="CameraButtonIntentReceiver">
             <intent-filter>
